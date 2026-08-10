@@ -5,9 +5,9 @@ mod caesar;
 mod xor;
 mod hash;
 
-use::caesar::caesar;
-use::xor::xor;
-use::hash::hash;
+use caesar::caesar;
+use xor::xor;
+use hash::hash;
 
 fn main(){
   
