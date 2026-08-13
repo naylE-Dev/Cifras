@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Playground</title>
+</head>
+<body>
+    <h1>Crypto Playground</h1>
+
+    <script type="module">
+        import init, { caesar_wasm } from './pkg/cifras.js';
+
+        async function main() {
+            await init();
+            const resultado = caesar_wasm("Ola mundo", 3);
+            console.log(resultado);
+        }
+
+        main();
+    </script>
+</body>
+</html>
