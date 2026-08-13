@@ -1,0 +1,13 @@
+[package]
+name = "cifras"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aes-gcm = { version = "0.11", features = ["getrandom"] }
+rand = "0.10.2"
+sha2 = "0.11.0"
+wasm-bindgen = "0.2.127"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
