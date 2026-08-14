@@ -1,0 +1,15 @@
+{
+  "name": "cifras",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "cifras_bg.wasm",
+    "cifras.js",
+    "cifras.d.ts"
+  ],
+  "main": "cifras.js",
+  "types": "cifras.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
