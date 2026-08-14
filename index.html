@@ -7,16 +7,159 @@
 <body>
     <h1>Crypto Playground</h1>
 
-    <script type="module">
-        import init, { caesar_wasm } from './pkg/cifras.js';
+    <div>
+        <h2>Caesar</h2>
+        <input type="text" id="caesar-texto" placeholder="Digite o texto">
+        <input type="number" id="caesar-chave" placeholder="Chave" value="3">
+        <button id="caesar-botao">Cifrar</button>
+        <p id="caesar-resultado"></p>
+    </div>
 
-        async function main() {
-            await init();
-            const resultado = caesar_wasm("Ola mundo", 3);
-            console.log(resultado);
-        }
+    <div>
+        <h2>XOR</h2>
+        <input type="text" id="xor-texto" placeholder="Digite o texto">
+        <input type="text" id="xor-senha" placeholder="senha" value="oi">
+        <button id="xor-botao">Cifrar</button>
+        <p id="xor-resultado"></p>
+    </div>
 
-        main();
-    </script>
+    <div>
+        <h2>Hash</h2>
+        <input type="text" id="hash-texto" placeholder="Digite o texto">
+        <button id="hash-botao">Cifrar</button>
+        <p id="hash-resultado"></p>
+    </div>
+
+    <div>
+        <h2>AES-256</h2>
+		<h3>Cifrar</h3>
+        <input type="text" id="aes-texto" placeholder="Digite o texto">
+        <input type="text" id="aes-senha" placeholder="senha" value="senha">
+        <button id="aes-botao">Cifrar</button>
+        <p id="aes-resultado"></p>
+        <p id="aes-nonce"></p>
+		<h3>Decifrar</h3>
+		<input type="text" id="aes-texto-decifra" placeholder="Digite o texto">
+		<input type="text" id="aes-nonce-decifra" placeholder="Nonce (hex)">
+        <input type="text" id="aes-senha-decifra" placeholder="senha" value="senha">
+        <button id="aes-botao-decifra">Decifrar</button>
+        <p id="aes-resultado-decifra"></p>
+    </div>
+
+
+
+	<script type="module">
+    	import init, { caesar_wasm, xor_wasm, hash_wasm, aes_wasm, decifrar_aes_wasm } from './pkg/cifras.js';
+
+		function paraHex(bytes) {
+			let resultado = "";
+			for (const byte of bytes) {
+				resultado += byte.toString(16).padStart(2, "0");
+			}
+			return resultado;
+		}
+
+		function hexParaBytes(hex) {
+    		const bytes = new Uint8Array(hex.length / 2);
+    		for (let i = 0; i < hex.length; i += 2) {
+        		bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+    		}
+    		return bytes;
+		}
+		
+		async function main() {
+			await init();
+        	const botao_caesar = document.getElementById("caesar-botao");
+    		const botao_xor = document.getElementById("xor-botao");
+			const botao_hash = document.getElementById("hash-botao");
+			const botao_aes = document.getElementById("aes-botao");
+			const botao_aes_decifra = document.getElementById("aes-botao-decifra");
+
+
+       		botao_caesar.addEventListener("click", () => {
+        		    const elementoTexto = document.getElementById("caesar-texto");
+	    			const valorDigitado = elementoTexto.value;
+			
+					const elementoNumero = document.getElementById("caesar-chave");
+					const valorDigitad = Number(elementoNumero.value);
+			
+					const elementoResultado = document.getElementById("caesar-resultado");
+					const caesarReal = caesar_wasm(valorDigitado, valorDigitad);
+					elementoResultado.textContent = caesarReal;
+            
+    		    });
+			
+       		botao_xor.addEventListener("click", () => {
+					const encoder = new TextEncoder();
+        		    const elementoTexto = document.getElementById("xor-texto");
+	    			const valorDigitado = encoder.encode(elementoTexto.value);
+			
+					const elementoNumero = document.getElementById("xor-senha");
+					const valorDigitad = encoder.encode(elementoNumero.value);
+			
+					const elementoResultado = document.getElementById("xor-resultado");
+					const xorReal = xor_wasm(valorDigitado, valorDigitad);
+					const resultadoXor = paraHex(xorReal);
+					
+					elementoResultado.textContent = resultadoXor;
+            
+    		    });
+
+       		botao_hash.addEventListener("click", () => {
+        		    const elementoTexto = document.getElementById("hash-texto");
+	    			const valorDigitado = elementoTexto.value;
+
+					const hashReal = hash_wasm(valorDigitado);
+					const resultadoHash = paraHex(hashReal);
+
+					const elementoResultado = document.getElementById("hash-resultado");
+					elementoResultado.textContent = resultadoHash;
+            
+    		    });
+
+       		botao_aes.addEventListener("click", () => {
+        		    const elementoTexto = document.getElementById("aes-texto");
+	    			const valorDigitado = elementoTexto.value;
+
+					const elementoSenha = document.getElementById("aes-senha");
+					const valorSenha = hash_wasm(elementoSenha.value);
+
+					const aesReal = aes_wasm(valorDigitado, valorSenha);
+					const cipherTexto = aesReal.ciphertext;
+					const nonce = aesReal.nonce;
+
+					const resultadoCipher = paraHex(cipherTexto);
+					const resultadoNonce = paraHex(nonce);
+
+					const elementoCipher = document.getElementById("aes-resultado");
+					elementoCipher.textContent = resultadoCipher;
+					const elementoNonce = document.getElementById("aes-nonce");
+					elementoNonce.textContent = resultadoNonce;
+            
+    		    });
+
+       		botao_aes_decifra.addEventListener("click", () => {
+        		    const elementoTexto = document.getElementById("aes-texto-decifra");
+	    			const valorDigitado = elementoTexto.value;
+
+					const elementoNonce = document.getElementById("aes-nonce-decifra");
+					const valorNonce = elementoNonce.value;
+
+					const elementoSenha = document.getElementById("aes-senha-decifra");
+					const valorSenha = hash_wasm(elementoSenha.value);
+
+					const textoHex = hexParaBytes(valorDigitado);
+					const nonceHex = hexParaBytes(valorNonce);
+
+					const aesDecifra = decifrar_aes_wasm(textoHex, nonceHex, valorSenha);
+
+					const elementoResultado = document.getElementById("aes-resultado-decifra");
+					elementoResultado.textContent = aesDecifra;
+            
+    		    });
+
+    		}
+		main();
+	</script>
 </body>
 </html>
